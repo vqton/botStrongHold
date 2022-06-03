@@ -3,7 +3,7 @@ import time
 from cv2 import log
 import pyautogui as gui
 
-from checkExistingApp import *
+from helpers import *
 
 
 def startapp():
@@ -15,13 +15,7 @@ def login():
     time.sleep(2)
     # boxUser = gui.locateAllOnScreen(r'images/login/user_1.png',
     # grayscale=True, confidence=0.7)
-    time.sleep(3)
-    autoLogin = gui.locateCenterOnScreen(
-        r'images/login/autoLoginCheck.png', grayscale=True, confidence=0.7)
     
-    time.sleep(3)
-    gui.leftClick(autoLogin)
-
     time.sleep(2)
     posUser = gui.locateCenterOnScreen(
         r'images/login/user_1.png', grayscale=True, confidence=0.7)
@@ -35,13 +29,20 @@ def login():
     time.sleep(1)
     gui.typewrite('vuquangton@ymail.com')
 
-    time.sleep(2)
+    time.sleep(0.5)
     gui.press('tab')
 
-    time.sleep(1)
+    time.sleep(0.5)
     gui.typewrite('5319dca90')
     
-    time.sleep(1)
+    time.sleep(3)
+    autoLogin = gui.locateCenterOnScreen(
+        r'images/login/autoLoginCheck.png', grayscale=True, confidence=0.7)
+    
+    time.sleep(3)
+    gui.leftClick(autoLogin)
+
+    time.sleep(0.5)
     gui.press('enter')
 
     time.sleep(5)
