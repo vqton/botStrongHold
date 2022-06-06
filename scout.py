@@ -1,11 +1,14 @@
 from functools import reduce
 import os
+
 import fnmatch
 from posixpath import split
+import sre_compile
 import pygetwindow as gw
 import time
 import pyautogui as gui
-# from helpers import *
+from helpers import *
+
 # from ocr import core
 # from startapp import login, startapp
 
@@ -21,26 +24,33 @@ def activeWndStrongHold():
     win.restore()
 
 
-def clickPOS(pts):
-    gui.mouseDown(pts.x, pts.y)
-    time.sleep(0.5)
-    gui.mouseUp(pts.x, pts.y)
-    time.sleep(3)
+
 
 
 def letGo():
-    posGo = gui.locateCenterOnScreen(
-        'images/collectRes/butGo.png', grayscale=True, confidence=0.7)
+    posGo = gui.locateOnScreen(
+        'images/scout/butGo.png', grayscale=True, confidence=0.7)
     time.sleep(3)
     clickPOS(gui.center(posGo))
     pass
 
 
 def sendScout():
-    posCollect = gui.locateCenterOnScreen(
-        'images/collectRes/scout.png', grayscale=True, confidence=0.7)
-    time.sleep(3)
-    clickPOS(gui.center(posCollect))
+    try:
+        posCollect = gui.locateOnScreen(
+            r'images\scout\scout.png', grayscale=True, confidence=0.7)
+        time.sleep(3)
+        pts = gui.center(posCollect)
+        clickPOS(pts)
+        gui.screenshot(r'temp\sample.png')
+        time.sleep(0.5)
+        
+        
+        time.sleep(0.5)
+        letGo()
+    except Exception as e:
+        print(e)
+        pass
 
 
 def clickWorldButton():
@@ -56,35 +66,42 @@ def clickWorldButton():
 
 
 def getPosRes(sResource):
-    resImgpath = r'images\collectRes\stash3.png'
-
-    posResource = gui.locateOnScreen(
-        resImgpath, grayscale=True, confidence=0.5)
-    time.sleep(5)
-    if posResource is None:
-        return None
-    else:
-        return gui.center(posResource)
+    sPath = 'images/collectRes/'+sResource+"/"
+    lstFile = getListFiles(sPath)
+    for f in lstFile:
+        spathRes = join(sPath, f)
+        print(spathRes)
+        posResource = gui.locateOnScreen(
+           spathRes, grayscale=True, confidence=0.8)
+        time.sleep(5)
+        if posResource is not None:
+            return gui.center(posResource)
 
 
 def getResource(sResource):
     posResource = getPosRes(sResource)
     time.sleep(3)
-    print(type(posResource))
-    if posResource is None:
-        gui.alert('Resource not found', 'Get Resource')
-        exit(0)
+    if isinstance(posResource, type(None)):
+        return None
     else:
+        print(f'{sResource}: ({posResource.y},{posResource.y})')
         clickPOS(posResource)
+        sendScout()
 
+
+lstRes = ['stash', 'wood', 'stone', 'iron', 'cheese','meat']
 
 activeWndStrongHold()
+clickWorldButton()
+for i in range(0, len(lstRes)):
+    # print(lstRes[i])
+    getResource(lstRes[i])
 # pos = getPosRes(r'images\collectRes\stash2.png')
-posResource = gui.locateOnScreen(
-    r'images\collectRes\stash3.png')
-time.sleep(3)
-print(type(posResource))
-gui.moveTo(gui.center(posResource).x, gui.center(posResource).y, 3)
+# posResource = gui.locateOnScreen(
+#     r'images\collectRes\stash3.png')
+# time.sleep(3)
+# print(type(posResource))
+# gui.moveTo(gui.center(posResource).x, gui.center(posResource).y, 3)
 # getResource('stone')
 # def getResources(sResource):
 #     try:

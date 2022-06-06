@@ -1,5 +1,8 @@
 import win32gui
-
+import pyautogui as gui
+import time
+from os import listdir
+from os.path import isfile, join
 results = []
 top_windows = []
 
@@ -16,3 +19,16 @@ def BringWindow2Front(sName):
             win32gui.ShowWindow(i[0], 5)
             win32gui.SetForegroundWindow(i[0])
             break
+
+
+def clickPOS(pts):
+    gui.moveTo(pts.x, pts.y)
+    time.sleep(0.5)
+    gui.mouseDown(pts.x, pts.y)
+    time.sleep(0.5)
+    gui.mouseUp(pts.x, pts.y)
+    time.sleep(3)
+
+def getListFiles(sPath):
+    onlyfiles = [f for f in listdir(sPath) if isfile(join(sPath, f))]
+    return onlyfiles
