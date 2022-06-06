@@ -23,7 +23,7 @@ def getSection(_object, _template):
   
 
 def main():
-    getSection('images/sample3.jpg', 'images/object.png')
+    getSection('temp/sample.jpg', 'images/collectRes/object2.png')
 
 
 if __name__ == '__main__':

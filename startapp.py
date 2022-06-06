@@ -1,3 +1,4 @@
+from email.policy import strict
 import os
 import time
 from cv2 import log
@@ -6,16 +7,25 @@ import pyautogui as gui
 from helpers import *
 
 
+def getExecPath():
+
+    # how to determinte x86 or x64 windows os
+    exeSubPath = r'\Firefly Studios\Stronghold Kingdoms\StrongholdKingdoms.exe'
+    if os.path.exists(r'C:\Program Files (x86)'):
+        return r'C:\Program Files (x86)' + exeSubPath
+    else:
+        return r'C:\Program Files' + exeSubPath
+
+
 def startapp():
-    os.startfile(
-        r'C:\Program Files\Firefly Studios\Stronghold Kingdoms\StrongholdKingdoms.exe')
+    os.startfile(getExecPath())
 
 
 def login():
     time.sleep(2)
     # boxUser = gui.locateAllOnScreen(r'images/login/user_1.png',
     # grayscale=True, confidence=0.7)
-    
+
     time.sleep(2)
     posUser = gui.locateCenterOnScreen(
         r'images/login/user_1.png', grayscale=True, confidence=0.7)
@@ -34,11 +44,11 @@ def login():
 
     time.sleep(0.5)
     gui.typewrite('5319dca90')
-    
+
     time.sleep(3)
     autoLogin = gui.locateCenterOnScreen(
         r'images/login/autoLoginCheck.png', grayscale=True, confidence=0.7)
-    
+
     time.sleep(3)
     gui.leftClick(autoLogin)
 
@@ -52,6 +62,6 @@ def login():
     time.sleep(3)
     gui.leftClick(playGame)
 
-startapp()
-time.sleep(30)
-login()
+
+# getExecPath()
+
