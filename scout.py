@@ -1,3 +1,4 @@
+from ocr import core
 from functools import reduce
 import os
 
@@ -10,7 +11,7 @@ import pyautogui as gui
 from helpers import *
 
 # from ocr import core
-# from startapp import login, startapp
+from startapp import login, startapp
 
 sText = ''
 
@@ -19,12 +20,16 @@ iSecondSleep = 10
 
 
 def activeWndStrongHold():
-    win = gw.getWindowsWithTitle('Stronghold Kingdoms - World 11')[0]
-    win.activate()
-    win.restore()
 
-
-
+    try:
+        win = gw.getWindowsWithTitle('Stronghold Kingdoms - World 11')[0]
+        win.activate()
+        win.restore()
+    except Exception as e:
+        startapp()
+        time.sleep(5)
+        login()
+        time.sleep(5)
 
 
 def letGo():
@@ -35,6 +40,16 @@ def letGo():
     pass
 
 
+def isAvailableScout():
+    posScout = gui.locateOnScreen(
+        r'images\scout\zeroscout.png', grayscale=True, confidence=0.7)
+    time.sleep(3)
+    if isinstance(posScout, type(None)):
+        return False
+    else:
+        return True
+
+
 def sendScout():
     try:
         posCollect = gui.locateOnScreen(
@@ -43,9 +58,21 @@ def sendScout():
         pts = gui.center(posCollect)
         clickPOS(pts)
         gui.screenshot(r'temp\sample.png')
+        if isAvailableScout() == False:
+            exit()
+
         time.sleep(0.5)
-        
-        
+        sTime = core()
+        a = ""
+        for x in sTime:
+            if x.isdigit():
+                a = a+x
+        sec = int(a[:2]) * 60 + int(a[-2:])
+
+        f = open(r'temp\data.txt', 'w')
+        f.write(str(sec))
+        f.close()
+
         time.sleep(0.5)
         letGo()
     except Exception as e:
@@ -72,10 +99,12 @@ def getPosRes(sResource):
         spathRes = join(sPath, f)
         print(spathRes)
         posResource = gui.locateOnScreen(
-           spathRes, grayscale=True, confidence=0.8)
+            spathRes, grayscale=True, confidence=0.8)
         time.sleep(5)
-        if posResource is not None:
-            return gui.center(posResource)
+        if not isinstance(posResource, type(None)):
+            pts = gui.center(posResource)
+            print(f'Found {sResource} at {pts.x},{pts.y}')
+            return pts
 
 
 def getResource(sResource):
@@ -89,13 +118,24 @@ def getResource(sResource):
         sendScout()
 
 
-lstRes = ['stash', 'wood', 'stone', 'iron', 'cheese','meat']
+lstRes = ['stash', 'wood', 'stone', 'iron', 'cheese', 'meat']
 
 activeWndStrongHold()
 clickWorldButton()
+
+f = open(r'temp\data.txt', 'w')
+f.write('0')
+f.close()
+
 for i in range(0, len(lstRes)):
-    # print(lstRes[i])
-    getResource(lstRes[i])
+    f = open(r'temp\data.txt', 'r')
+    line = f.readline()
+    f.close()
+    time.sleep(int(line[0]))
+    print(line)
+    getResource(lstRes[3])
+
+gui.alert('Done')
 # pos = getPosRes(r'images\collectRes\stash2.png')
 # posResource = gui.locateOnScreen(
 #     r'images\collectRes\stash3.png')

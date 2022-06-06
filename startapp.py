@@ -19,6 +19,7 @@ def getExecPath():
 
 def startapp():
     os.startfile(getExecPath())
+    time.sleep(25)
 
 
 def login():
