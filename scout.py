@@ -40,14 +40,17 @@ def letGo():
     pass
 
 
-def isAvailableScout():
-    posScout = gui.locateOnScreen(
-        r'images\scout\zeroscout.png', grayscale=True, confidence=0.7)
+def isNotAvailableScout():
+    posScout = gui.locate(
+        r'images\scout\zeroscout.png', r'temp\sample.png', grayscale=True)
     time.sleep(3)
-    if isinstance(posScout, type(None)):
-        return False
-    else:
+    # pts = gui.center(posScout)
+    # print('({pts.x},{pts.y})')
+    # return isinstance(posScout, type(None))
+    if posScout is not None:
         return True
+    else:
+        return False
 
 
 def sendScout():
@@ -57,11 +60,19 @@ def sendScout():
         time.sleep(3)
         pts = gui.center(posCollect)
         clickPOS(pts)
-        gui.screenshot(r'temp\sample.png')
-        if isAvailableScout() == False:
-            exit()
 
-        time.sleep(0.5)
+        gui.screenshot(r'temp\sample.png')
+        time.sleep(1)
+
+        isAS = isNotAvailableScout()
+
+        if isAS == True:
+            pos = gui.locateOnScreen(r'images/scout/closeBtn.png')
+            ps1 = gui.center(pos)
+            clickPOS(ps1)
+            time.sleep(3)
+
+        time.sleep(5)
         sTime = core()
         a = ""
         for x in sTime:
@@ -97,7 +108,6 @@ def getPosRes(sResource):
     lstFile = getListFiles(sPath)
     for f in lstFile:
         spathRes = join(sPath, f)
-        print(spathRes)
         posResource = gui.locateOnScreen(
             spathRes, grayscale=True, confidence=0.8)
         time.sleep(5)
@@ -118,10 +128,26 @@ def getResource(sResource):
         sendScout()
 
 
-lstRes = ['stash', 'wood', 'stone', 'iron', 'cheese', 'meat']
+def clickHome():
+    try:
+        pos = gui.locateOnScreen(
+            r'images\\home.png', grayscale=True, confidence=0.8)
+        time.sleep(3)
+        pts = gui.center(pos)
+        # print(f'{pts.x}, {pts.y}')
+        clickPOS(pts)
+    except:
+        print('An exception occurred')
+
+
+lstRes = ['stash', 'apple', 'wood', 'stone', 'iron',
+          'cheese', 'meat', 'clothes', 'bread']
+# lstRes = ['bread', 'wood']
 
 activeWndStrongHold()
 clickWorldButton()
+clickHome()
+
 
 f = open(r'temp\data.txt', 'w')
 f.write('0')
@@ -133,7 +159,7 @@ for i in range(0, len(lstRes)):
     f.close()
     time.sleep(int(line[0]))
     print(line)
-    getResource(lstRes[3])
+    getResource(lstRes[i])
 
 gui.alert('Done')
 # pos = getPosRes(r'images\collectRes\stash2.png')
