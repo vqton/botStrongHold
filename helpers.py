@@ -10,6 +10,13 @@ top_windows = []
 def windowEnumerationHandler(hwnd, top_windows):
     top_windows.append((hwnd, win32gui.GetWindowText(hwnd)))
 
+def convertTime2Secound(sTime):
+    a = ""
+    for x in sTime:
+        if x.isdigit():
+            a = a+x
+    sec = int(a[:2]) * 60 + int(a[-2:])
+    return sec
 
 def BringWindow2Front(sName):
     win32gui.EnumWindows(windowEnumerationHandler, top_windows)
@@ -22,11 +29,11 @@ def BringWindow2Front(sName):
 
 
 def clickPOS(pts):
-    gui.moveTo(pts.x, pts.y)
+    gui.moveTo(pts[0], pts[1])
     time.sleep(0.5)
-    gui.mouseDown(pts.x, pts.y)
+    gui.mouseDown(pts[0], pts[1])
     time.sleep(0.5)
-    gui.mouseUp(pts.x, pts.y)
+    gui.mouseUp(pts[0], pts[1])
     time.sleep(3)
 
 def getListFiles(sPath):

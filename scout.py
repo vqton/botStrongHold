@@ -43,7 +43,7 @@ def letGo():
 def isNotAvailableScout():
     posScout = gui.locate(
         r'images\scout\zeroscout.png', r'temp\sample.png', grayscale=True)
-    time.sleep(3)
+    time.sleep(1.5)
     # pts = gui.center(posScout)
     # print('({pts.x},{pts.y})')
     # return isinstance(posScout, type(None))
@@ -57,9 +57,12 @@ def sendScout():
     try:
         posCollect = gui.locateOnScreen(
             r'images\scout\scout.png', grayscale=True, confidence=0.7)
-        time.sleep(3)
+        time.sleep(1.5)
         pts = gui.center(posCollect)
         clickPOS(pts)
+
+        if isfile(r'temp\sample.png'):
+            os.remove(r'temp\sample.png')
 
         gui.screenshot(r'temp\sample.png')
         time.sleep(1)
@@ -74,11 +77,7 @@ def sendScout():
 
         time.sleep(5)
         sTime = core()
-        a = ""
-        for x in sTime:
-            if x.isdigit():
-                a = a+x
-        sec = int(a[:2]) * 60 + int(a[-2:])
+        sec = convertTime2Secound(sTime)
 
         f = open(r'temp\data.txt', 'w')
         f.write(str(sec))
@@ -87,7 +86,7 @@ def sendScout():
         time.sleep(0.5)
         letGo()
     except Exception as e:
-        print(e)
+        print(f'sendScout: {e}')
         pass
 
 
@@ -96,7 +95,7 @@ def clickWorldButton():
         time.sleep(5)
         posMapBtn = gui.locateOnScreen(
             r'images/collectRes/map.png', grayscale=True, confidence=0.75)
-        time.sleep(3)
+        time.sleep(1.5)
         clickPOS(gui.center(posMapBtn))
     except Exception as e:
         gui.alert(e, 'clickWorldButton')
@@ -110,11 +109,16 @@ def getPosRes(sResource):
         spathRes = join(sPath, f)
         posResource = gui.locateOnScreen(
             spathRes, grayscale=True, confidence=0.8)
-        time.sleep(5)
+        time.sleep(2)
         if not isinstance(posResource, type(None)):
             pts = gui.center(posResource)
             print(f'Found {sResource} at {pts.x},{pts.y}')
             return pts
+
+
+def getResourceByPos(pts):
+    clickPOS(pts)
+    sendScout()
 
 
 def getResource(sResource):
@@ -153,68 +157,48 @@ f = open(r'temp\data.txt', 'w')
 f.write('0')
 f.close()
 
-for i in range(0, len(lstRes)):
-    f = open(r'temp\data.txt', 'r')
-    line = f.readline()
-    f.close()
-    time.sleep(int(line[0]))
-    print(line)
-    getResource(lstRes[i])
+# for i in range(0, len(lstRes)):
+#     f = open(r'temp\data.txt', 'r')
+#     line = f.readline()
+#     f.close()
+#     time.sleep(int(line[0]))
+#     print(line)
+#     getResource(lstRes[i])
 
-gui.alert('Done')
-# pos = getPosRes(r'images\collectRes\stash2.png')
-# posResource = gui.locateOnScreen(
-#     r'images\collectRes\stash3.png')
-# time.sleep(3)
-# print(type(posResource))
-# gui.moveTo(gui.center(posResource).x, gui.center(posResource).y, 3)
-# getResource('stone')
-# def getResources(sResource):
-#     try:
-#         if getPos(sResource) is not None:
-#             time.sleep(3)
-#             print(f'Found {sResource} at ({pts.x},{pts.y}), ')
-#             time.sleep(3)
-#             gui.mouseDown(pts.x, pts.y)
-#             time.sleep(1)
-#             gui.mouseUp(pts.x, pts.y)
-#             time.sleep(5)
-
-#         sendScout()
-
-#         gui.screenshot('temp/sample.jpg')
-#         sTime = core()
-#         char_to_replace = {'h': '',
-#                            'm': '',
-#                            's': '',
-#                            ':': ''}
-#         sTime = sTime.translate(str.maketrans(char_to_replace)).strip()
-
-#         iSecondSleep = int(sTime[:2]) * 60 + int(sTime[-2:])
-#         text_file = open("temp/data.txt", "w")
-
-#         # write string to file
-#         n = text_file.write(str(iSecondSleep))
-#         # close file
-#         text_file.close()
-#         print(iSecondSleep)
-
-#         time.sleep(5)
-#         letGo()
-#         time.sleep(3)
-#     except Exception as e:
-#         print(f'getResources: {e}')
-#         isExisting = True
-#         exit(1)
+# gui.alert('Done')
 
 
-# try:
-#     win = gw.getWindowsWithTitle('Stronghold Kingdoms - World 11')[0]
-#     win.activate()
-#     win.restore()
-# except Exception as e:
-#     print(e)
-#     startapp()
-#     time.sleep(30)
-#     login()
-#     time.sleep(15)
+# hold postion of resources at dictionary
+dctResource = {'stash': (0, 0), 'apple': (0, 0), 'wood': (0, 0), 'stone': (0, 0), 'iron': (0, 0),
+               'cheese': (0, 0), 'meat': (0, 0), 'clothes': (0, 0), 'bread': (0, 0)}
+
+
+def getAllResourcePos(dctRes):
+    try:
+        for k, v in dctRes.items():
+            pts = getPosRes(k)
+            if isinstance(pts, type(None)) == False:
+                dctRes.update({k: (pts.x, pts.y)})
+        print('done')
+        return dctRes
+    except Exception as e:
+        gui.alert(e, 'getAllResourcePos')
+
+
+getAllResourcePos(dctResource)
+for k, v in dctResource.items():
+    value = dctResource.get(k)
+    print(f'{k}{value}')
+    if not value == (0, 0):
+        getResourceByPos(value)
+gui.alert('done', 'getAllResourcePos')
+
+# pts = (580, 651)
+# getResourceByPos(pts)
+exit(0)
+
+
+print(dctResource)
+
+for k, v in dctResource.items():
+    pass
