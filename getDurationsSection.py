@@ -19,13 +19,17 @@ def getSection(_object, _template):
     for y, x in zip(loc[0], loc[1]):
         cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 1)
         crop_img = img[y:y + h, x:x+w]
-    if os.path.isfile('temp/crop.jpg'):
-        os.remove('temp/crop.jpg')
+        
     cv2.imwrite('temp/crop.jpg',crop_img)
+    
+    # if os.path.isfile('temp/crop.jpg'):
+    #     os.remove('temp/crop.jpg')
+    
+    
   
 
 def main():
-    getSection('temp/sample.png', 'images/collectRes/object.png')
+    getSection('temp/sample.png', 'images/collectRes/object2.png')
 
 
 if __name__ == '__main__':

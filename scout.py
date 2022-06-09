@@ -17,7 +17,7 @@ sText = ''
 
 isExisting = False
 iSecondSleep = 10
-
+TIME_LOCATING = 1
 
 def activeWndStrongHold():
 
@@ -35,7 +35,7 @@ def activeWndStrongHold():
 def letGo():
     posGo = gui.locateOnScreen(
         'images/scout/butGo.png', grayscale=True, confidence=0.7)
-    time.sleep(3)
+    time.sleep(TIME_LOCATING)
     clickPOS(gui.center(posGo))
     pass
 
@@ -43,7 +43,7 @@ def letGo():
 def isNotAvailableScout():
     posScout = gui.locate(
         r'images\scout\zeroscout.png', r'temp\sample.png', grayscale=True)
-    time.sleep(1.5)
+    time.sleep(TIME_LOCATING)
     # pts = gui.center(posScout)
     # print('({pts.x},{pts.y})')
     # return isinstance(posScout, type(None))
@@ -57,7 +57,7 @@ def sendScout():
     try:
         posCollect = gui.locateOnScreen(
             r'images\scout\scout.png', grayscale=True, confidence=0.7)
-        time.sleep(1.5)
+        time.sleep(TIME_LOCATING)
         pts = gui.center(posCollect)
         clickPOS(pts)
 
@@ -65,7 +65,7 @@ def sendScout():
             os.remove(r'temp\sample.png')
 
         gui.screenshot(r'temp\sample.png')
-        time.sleep(1)
+        time.sleep(TIME_LOCATING)
 
         isAS = isNotAvailableScout()
 
@@ -73,9 +73,9 @@ def sendScout():
             pos = gui.locateOnScreen(r'images/scout/closeBtn.png')
             ps1 = gui.center(pos)
             clickPOS(ps1)
-            time.sleep(3)
+            time.sleep(TIME_LOCATING)
 
-        time.sleep(5)
+        time.sleep(TIME_LOCATING)
         sTime = core()
         sec = convertTime2Secound(sTime)
 
@@ -95,7 +95,7 @@ def clickWorldButton():
         time.sleep(5)
         posMapBtn = gui.locateOnScreen(
             r'images/collectRes/map.png', grayscale=True, confidence=0.75)
-        time.sleep(1.5)
+        time.sleep(TIME_LOCATING)
         clickPOS(gui.center(posMapBtn))
     except Exception as e:
         gui.alert(e, 'clickWorldButton')
@@ -109,7 +109,7 @@ def getPosRes(sResource):
         spathRes = join(sPath, f)
         posResource = gui.locateOnScreen(
             spathRes, grayscale=True, confidence=0.8)
-        time.sleep(2)
+        time.sleep(TIME_LOCATING)
         if not isinstance(posResource, type(None)):
             pts = gui.center(posResource)
             print(f'Found {sResource} at {pts.x},{pts.y}')
@@ -123,7 +123,7 @@ def getResourceByPos(pts):
 
 def getResource(sResource):
     posResource = getPosRes(sResource)
-    time.sleep(3)
+    time.sleep(TIME_LOCATING)
     if isinstance(posResource, type(None)):
         return None
     else:
@@ -136,7 +136,7 @@ def clickHome():
     try:
         pos = gui.locateOnScreen(
             r'images\\home.png', grayscale=True, confidence=0.8)
-        time.sleep(3)
+        time.sleep(TIME_LOCATING)
         pts = gui.center(pos)
         # print(f'{pts.x}, {pts.y}')
         clickPOS(pts)
@@ -168,6 +168,10 @@ f.close()
 # gui.alert('Done')
 
 
+def isResourceExisting(sResource):
+    pass
+
+
 # hold postion of resources at dictionary
 dctResource = {'stash': (0, 0), 'apple': (0, 0), 'wood': (0, 0), 'stone': (0, 0), 'iron': (0, 0),
                'cheese': (0, 0), 'meat': (0, 0), 'clothes': (0, 0), 'bread': (0, 0)}
@@ -178,7 +182,7 @@ def getAllResourcePos(dctRes):
         for k, v in dctRes.items():
             pts = getPosRes(k)
             if isinstance(pts, type(None)) == False:
-                dctRes.update({k: (pts.x, pts.y)})
+                dctRes.update({k: (pts[0], pts[1])})
         print('done')
         return dctRes
     except Exception as e:
@@ -202,3 +206,10 @@ print(dctResource)
 
 for k, v in dctResource.items():
     pass
+
+def main():
+    pass
+
+if __name__ == '__main__':
+    main()
+    
