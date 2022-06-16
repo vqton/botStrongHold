@@ -1,28 +1,40 @@
 from ocr import core
 from functools import reduce
 import os
-
-import fnmatch
+import json
+from dict2xml import dict2xml
+from detectObject import detectObject
 from posixpath import split
-import sre_compile
 import pygetwindow as gw
 import time
 import pyautogui as gui
 from helpers import *
-
-# from ocr import core
 from startapp import login, startapp
 
-sText = ''
-
+sText = ""
+lstRes = [
+    "stash",
+    "apple",
+    "wood",
+    "stone",
+    "iron",
+    "cheese",
+    "meat",
+    "clothes",
+    "bread",
+]
 isExisting = False
 iSecondSleep = 10
+TIME_LOCATING = 1
+ptHome = (0, 0)
+SETTING_FILENAME = "settings.json"
+
+dctSettings = {}
 
 
 def activeWndStrongHold():
-
     try:
-        win = gw.getWindowsWithTitle('Stronghold Kingdoms - World 11')[0]
+        win = gw.getWindowsWithTitle("Stronghold Kingdoms - World 11")[0]
         win.activate()
         win.restore()
     except Exception as e:
@@ -33,60 +45,69 @@ def activeWndStrongHold():
 
 
 def letGo():
-    posGo = gui.locateOnScreen(
-        'images/scout/butGo.png', grayscale=True, confidence=0.7)
-    time.sleep(3)
-    clickPOS(gui.center(posGo))
+    posGo = gui.locateOnScreen("images/scout/butGo.png", grayscale=True, confidence=0.7)
+    time.sleep(TIME_LOCATING)
+    pts = gui.center(posGo)
+    clickPOS(pts)
+    dctSettings["go"] = {"x": pts[0], "x": pts[1]}
+    wrtJSONSettings(SETTING_FILENAME, dctSettings)
+    clickPOS(ptHome)
     pass
 
 
 def isNotAvailableScout():
-    posScout = gui.locate(
-        r'images\scout\zeroscout.png', r'temp\sample.png', grayscale=True)
-    time.sleep(1.5)
-    # pts = gui.center(posScout)
-    # print('({pts.x},{pts.y})')
-    # return isinstance(posScout, type(None))
-    if posScout is not None:
-        return True
-    else:
-        return False
+    isavailable = detectObject(r"images\scout\zero.jpg", r"temp\sample.png")
+    return isavailable
 
 
 def sendScout():
     try:
         posCollect = gui.locateOnScreen(
-            r'images\scout\scout.png', grayscale=True, confidence=0.7)
-        time.sleep(1.5)
+            r"images\scout\scout.png", grayscale=True, confidence=0.7
+        )
+        time.sleep(TIME_LOCATING)
         pts = gui.center(posCollect)
+        dctSettings["scout"] = {"x": int(pts[0]), "y": int(pts[1])}
+
+        wrtJSONSettings(SETTING_FILENAME, dctSettings)
         clickPOS(pts)
 
-        if isfile(r'temp\sample.png'):
-            os.remove(r'temp\sample.png')
+        if isfile(r"temp\sample.png"):
+            os.remove(r"temp\sample.png")
 
-        gui.screenshot(r'temp\sample.png')
-        time.sleep(1)
+        gui.screenshot(r"temp\sample.png")
+        time.sleep(TIME_LOCATING)
 
         isAS = isNotAvailableScout()
 
         if isAS == True:
-            pos = gui.locateOnScreen(r'images/scout/closeBtn.png')
+            pos = gui.locateOnScreen(
+                r"images/scout/closeBtn.png", grayscale=True, confidence=0.75
+            )
+            time.sleep(TIME_LOCATING)
             ps1 = gui.center(pos)
+            # dctSettings["close"] = {"x": int(ps1[0]), "y": int(ps1[1])}
+            dctSettings["close"] = {"x": 0, "y": 0}
+            dctSettings["close"]["x"] = int(ps1[0])
+            dctSettings["close"]["y"] = int(ps1[1])
+            wrtJSONSettings(SETTING_FILENAME, dctSettings)
             clickPOS(ps1)
-            time.sleep(3)
+            time.sleep(TIME_LOCATING)
 
-        time.sleep(5)
-        sTime = core()
-        sec = convertTime2Secound(sTime)
-
-        f = open(r'temp\data.txt', 'w')
-        f.write(str(sec))
+        # time.sleep(TIME_LOCATING)
+        # sTime = core()
+        # sec = convertTime2Secound(sTime)
+        f = open(r"temp\data.txt", "w")
+        # if sec.isdigit():
+        #     f.write(str(sec))
+        # else:
+        f.write("250")
         f.close()
 
         time.sleep(0.5)
         letGo()
     except Exception as e:
-        print(f'sendScout: {e}')
+        print(f"sendScout: {e}")
         pass
 
 
@@ -94,25 +115,32 @@ def clickWorldButton():
     try:
         time.sleep(5)
         posMapBtn = gui.locateOnScreen(
-            r'images/collectRes/map.png', grayscale=True, confidence=0.75)
-        time.sleep(1.5)
-        clickPOS(gui.center(posMapBtn))
+            r"images/collectRes/map.png", grayscale=True, confidence=0.75
+        )
+        time.sleep(TIME_LOCATING * 3)
+        pts = gui.center(posMapBtn)
+        print(f"Map world button: {pts}")
+        dctSettings["map"] = {"x": int(pts[0]), "y": int(pts[1])}
+        dctSettings["map"]["x"] = int(pts[0])
+        dctSettings["map"]["y"] = int(pts[1])
+        clickPOS(pts)
+
+        wrtJSONSettings(SETTING_FILENAME, dctSettings)
     except Exception as e:
-        gui.alert(e, 'clickWorldButton')
+        gui.alert(e, "clickWorldButton")
         exit(1)
 
 
 def getPosRes(sResource):
-    sPath = 'images/collectRes/'+sResource+"/"
+    sPath = "images/collectRes/" + sResource + "/"
     lstFile = getListFiles(sPath)
     for f in lstFile:
         spathRes = join(sPath, f)
-        posResource = gui.locateOnScreen(
-            spathRes, grayscale=True, confidence=0.8)
-        time.sleep(2)
+        posResource = gui.locateOnScreen(spathRes, grayscale=True, confidence=0.8)
+        time.sleep(TIME_LOCATING)
         if not isinstance(posResource, type(None)):
             pts = gui.center(posResource)
-            print(f'Found {sResource} at {pts.x},{pts.y}')
+            print(f"Found {sResource} at {pts[0]},{pts[1]}")
             return pts
 
 
@@ -123,82 +151,56 @@ def getResourceByPos(pts):
 
 def getResource(sResource):
     posResource = getPosRes(sResource)
-    time.sleep(3)
+    time.sleep(TIME_LOCATING)
     if isinstance(posResource, type(None)):
         return None
     else:
-        print(f'{sResource}: ({posResource.y},{posResource.y})')
+        print(f"{sResource}: ({posResource[0]},{posResource[1]})")
         clickPOS(posResource)
         sendScout()
 
 
 def clickHome():
     try:
-        pos = gui.locateOnScreen(
-            r'images\\home.png', grayscale=True, confidence=0.8)
-        time.sleep(3)
+
+        pos = gui.locateOnScreen(r"images\\home.png", grayscale=True, confidence=0.6)
+        time.sleep(1.5)
         pts = gui.center(pos)
-        # print(f'{pts.x}, {pts.y}')
+        ptHome = pts
+        print(f"Home ({pts[0]}, {pts[1]})")
+        time.sleep(5)
         clickPOS(pts)
-    except:
-        print('An exception occurred')
+        dctSettings["home"] = {"x": 0, "y": 0}
+        dctSettings["home"]["x"] = int(ptHome[0])
+        dctSettings["home"]["y"] = int(ptHome[1])
+        wrtJSONSettings(SETTING_FILENAME, dctSettings)
+        # wrtJSonSetting('settings.json', json.dumps(dctSettings))
+    except Exception as e:
+        print(f"Exception clickHome {e}")
 
 
-lstRes = ['stash', 'apple', 'wood', 'stone', 'iron',
-          'cheese', 'meat', 'clothes', 'bread']
 # lstRes = ['bread', 'wood']
 
-activeWndStrongHold()
-clickWorldButton()
-clickHome()
+
+def wrtEstTime():
+    f = open(r"temp\data.txt", "w")
+    f.write("0")
+    f.close()
 
 
-f = open(r'temp\data.txt', 'w')
-f.write('0')
-f.close()
-
-# for i in range(0, len(lstRes)):
-#     f = open(r'temp\data.txt', 'r')
-#     line = f.readline()
-#     f.close()
-#     time.sleep(int(line[0]))
-#     print(line)
-#     getResource(lstRes[i])
-
-# gui.alert('Done')
-
-
-# hold postion of resources at dictionary
-dctResource = {'stash': (0, 0), 'apple': (0, 0), 'wood': (0, 0), 'stone': (0, 0), 'iron': (0, 0),
-               'cheese': (0, 0), 'meat': (0, 0), 'clothes': (0, 0), 'bread': (0, 0)}
-
-
-def getAllResourcePos(dctRes):
-    try:
-        for k, v in dctRes.items():
-            pts = getPosRes(k)
-            if isinstance(pts, type(None)) == False:
-                dctRes.update({k: (pts.x, pts.y)})
-        print('done')
-        return dctRes
-    except Exception as e:
-        gui.alert(e, 'getAllResourcePos')
-
-
-getAllResourcePos(dctResource)
-for k, v in dctResource.items():
-    value = dctResource.get(k)
-    print(f'{k}{value}')
-    if not value == (0, 0):
-        getResourceByPos(value)
-gui.alert('done', 'getAllResourcePos')
-
-# pts = (580, 651)
-# getResourceByPos(pts)
-exit(0)
-
-
-print(dctResource)
-
-for k, v in dctResource.items():
+def main():
+    wrtEstTime()
+    activeWndStrongHold()
+    clickWorldButton()
+    clickHome()
+    for item in lstRes:
+        pts = getPosRes(item)
+        if pts is not None:
+            getResourceByPos(pts)
+            exit(0)
+    # core()
     pass
+
+
+if __name__ == "__main__":
+    main()

@@ -19,14 +19,10 @@ def getExecPath():
 
 def startapp():
     os.startfile(getExecPath())
-    time.sleep(25)
+    time.sleep(30)
 
 
 def login():
-    time.sleep(2)
-    # boxUser = gui.locateAllOnScreen(r'images/login/user_1.png',
-    # grayscale=True, confidence=0.7)
-
     time.sleep(2)
     posUser = gui.locateCenterOnScreen(
         r'images/login/user_1.png', grayscale=True, confidence=0.7)
