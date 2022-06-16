@@ -1,3 +1,4 @@
+from extractText import extractText
 from ocr import core
 from functools import reduce
 import os
@@ -14,6 +15,7 @@ from startapp import login, startapp
 sText = ""
 lstRes = [
     "stash",
+    "salt",
     "apple",
     "wood",
     "stone",
@@ -49,7 +51,9 @@ def letGo():
     time.sleep(TIME_LOCATING)
     pts = gui.center(posGo)
     clickPOS(pts)
-    dctSettings["go"] = {"x": pts[0], "x": pts[1]}
+    dctSettings["go"] = {"x": 0, "y": 0}
+    dctSettings["go"]["x"] = int(pts[0])
+    dctSettings["go"]["y"] = int(pts[1])
     wrtJSONSettings(SETTING_FILENAME, dctSettings)
     clickPOS(ptHome)
     pass
@@ -196,8 +200,23 @@ def main():
     for item in lstRes:
         pts = getPosRes(item)
         if pts is not None:
-            getResourceByPos(pts)
-            exit(0)
+            gui.screenshot(r"temp/scene.png")
+            time.sleep(1)
+
+            isExisting = detectObject(
+                r"images/collectRes/" + item + "/1.png", r"temp/scene.png"
+            )
+            while isExisting:
+                getResourceByPos(pts)
+                sTime = extractText(r"temp/crop.jpg")
+                sec = convertTime2Second(sTime)
+                print(f"Second: {sec}")
+                gui.screenshot(r"temp/scene.png")
+                time.sleep(1)
+                isExisting = detectObject(
+                    r"images/collectRes/" + item + "/1.png", r"temp/scene.png"
+                )
+                time.sleep(int(sec))
     # core()
     pass
 
