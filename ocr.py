@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import os
+from os import path
 import pytesseract
 from imgPreprocessing import *
 from getDurationsSection import getSection
@@ -12,6 +14,8 @@ def match_template(image, template):
 
 
 def core():
+    if os.path.isdir('./temp')==False:
+        os.mkdir('./temp')
     # getSection('temp/sample.jpg', 'images/collectRes/object.png')
     image = cv2.imread('temp/crop.jpg')
     # image = cv2.imread('aurebesh.jpg')

@@ -3,14 +3,16 @@ import pytesseract
 import cv2
 from helpers import convertTime2Second
 
+
 def extractText(imagePath):
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    pytesseract.pytesseract.tesseract_cmd = (
+        r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    )
 
     # Load image, grayscale, Otsu's threshold
     image = cv2.imread(imagePath)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    thresh = cv2.threshold(
-        gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+    thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
     # Morph open to remove noise
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
@@ -29,6 +31,9 @@ def extractText(imagePath):
     result = cv2.GaussianBlur(result, (3, 3), 0)
 
     # Perform OCR
-    data = pytesseract.image_to_string(result, lang='eng', config='--psm 6')
+    data = pytesseract.image_to_string(result, lang="eng", config="--psm 6")
+    print(data)
     return data
 
+
+extractText(r"temp/crop.jpg")

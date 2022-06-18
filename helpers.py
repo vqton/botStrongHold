@@ -7,6 +7,7 @@ from dict2xml import dict2xml
 
 from os import listdir
 from os.path import isfile, join
+
 results = []
 top_windows = []
 
@@ -16,12 +17,12 @@ def windowEnumerationHandler(hwnd, top_windows):
 
 
 def wrtXmlSetting(fileName, data):
-    with open(fileName, 'w') as xFile:
-        xFile.write(dict2xml(data, wrap='root'))
+    with open(fileName, "w+") as xFile:
+        xFile.write(dict2xml(data, wrap="root"))
 
 
 def wrtJSONSettings(fileName, data):
-    with open(fileName, "w") as f:
+    with open(fileName, "w+") as f:
         json.dump(data, f)
 
 
@@ -29,7 +30,7 @@ def convertTime2Second(sTime):
     a = ""
     for x in sTime:
         if x.isdigit():
-            a = a+x
+            a = a + x
     try:
         min2sec = int(a[:2])
         sec = (min2sec * 60) + int(a[-2:])
@@ -64,3 +65,8 @@ def clickPOS(pts):
 def getListFiles(sPath):
     onlyfiles = [f for f in listdir(sPath) if isfile(join(sPath, f))]
     return onlyfiles
+
+
+def AddUpdateValueDict(dctName, item, pts):
+    dctName[item] = f"{int(pts[0])},{int(pts[1])}"
+    wrtJSONSettings("settings.xml", dctName)

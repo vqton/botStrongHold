@@ -1,3 +1,4 @@
+from extractText import extractText
 from ocr import core
 from functools import reduce
 import os
@@ -14,6 +15,7 @@ from startapp import login, startapp
 sText = ""
 lstRes = [
     "stash",
+    "salt",
     "apple",
     "wood",
     "stone",
@@ -28,7 +30,6 @@ iSecondSleep = 10
 TIME_LOCATING = 1
 ptHome = (0, 0)
 SETTING_FILENAME = "settings.json"
-
 dctSettings = {}
 
 
@@ -48,9 +49,10 @@ def letGo():
     posGo = gui.locateOnScreen("images/scout/butGo.png", grayscale=True, confidence=0.7)
     time.sleep(TIME_LOCATING)
     pts = gui.center(posGo)
-    clickPOS(pts)
-    dctSettings["go"] = {"x": pts[0], "x": pts[1]}
+    dctSettings["go"] = f"{int(pts[0])},{int(pts[1])}"
     wrtJSONSettings(SETTING_FILENAME, dctSettings)
+    clickPOS(pts)
+
     clickPOS(ptHome)
     pass
 
@@ -67,44 +69,31 @@ def sendScout():
         )
         time.sleep(TIME_LOCATING)
         pts = gui.center(posCollect)
-        dctSettings["scout"] = {"x": int(pts[0]), "y": int(pts[1])}
 
+        dctSettings["scout"] = f"{int(pts[0])},{int(pts[1])}"
         wrtJSONSettings(SETTING_FILENAME, dctSettings)
-        clickPOS(pts)
 
+        clickPOS(pts)
         if isfile(r"temp\sample.png"):
             os.remove(r"temp\sample.png")
-
         gui.screenshot(r"temp\sample.png")
         time.sleep(TIME_LOCATING)
 
         isAS = isNotAvailableScout()
-
         if isAS == True:
             pos = gui.locateOnScreen(
                 r"images/scout/closeBtn.png", grayscale=True, confidence=0.75
             )
             time.sleep(TIME_LOCATING)
             ps1 = gui.center(pos)
-            # dctSettings["close"] = {"x": int(ps1[0]), "y": int(ps1[1])}
-            dctSettings["close"] = {"x": 0, "y": 0}
-            dctSettings["close"]["x"] = int(ps1[0])
-            dctSettings["close"]["y"] = int(ps1[1])
+            AddUpdateValueDict(dctSettings, "close", ps1)
             wrtJSONSettings(SETTING_FILENAME, dctSettings)
             clickPOS(ps1)
             time.sleep(TIME_LOCATING)
 
-        # time.sleep(TIME_LOCATING)
-        # sTime = core()
-        # sec = convertTime2Secound(sTime)
-        f = open(r"temp\data.txt", "w")
-        # if sec.isdigit():
-        #     f.write(str(sec))
-        # else:
-        f.write("250")
-        f.close()
+        with open(r"temp\data.txt", "w") as f:
+            f.write("250")
 
-        time.sleep(0.5)
         letGo()
     except Exception as e:
         print(f"sendScout: {e}")
@@ -113,19 +102,16 @@ def sendScout():
 
 def clickWorldButton():
     try:
-        time.sleep(5)
         posMapBtn = gui.locateOnScreen(
-            r"images/collectRes/map.png", grayscale=True, confidence=0.75
+            r"images/collectRes/map.png", grayscale=True, confidence=0.3
         )
         time.sleep(TIME_LOCATING * 3)
         pts = gui.center(posMapBtn)
         print(f"Map world button: {pts}")
-        dctSettings["map"] = {"x": int(pts[0]), "y": int(pts[1])}
-        dctSettings["map"]["x"] = int(pts[0])
-        dctSettings["map"]["y"] = int(pts[1])
+        AddUpdateValueDict(dctSettings, "map", pts)
+        print(dctSettings)
         clickPOS(pts)
-
-        wrtJSONSettings(SETTING_FILENAME, dctSettings)
+        # wrtJSONSettings(SETTING_FILENAME, dctSettings)
     except Exception as e:
         gui.alert(e, "clickWorldButton")
         exit(1)
@@ -162,33 +148,46 @@ def getResource(sResource):
 
 def clickHome():
     try:
+        if "home" not in dctSettings:
+            pos = gui.locateOnScreen(
+                r"images\\home.png", grayscale=True, confidence=0.6
+            )
+            time.sleep(3)
+            print(dctSettings)
+            pts = gui.center(pos)
+            ptHome = pts
+            print(f"Home {ptHome}")
+            AddUpdateValueDict(dctSettings, "home", pts)
+            wrtJSONSettings(SETTING_FILENAME, dctSettings)
 
-        pos = gui.locateOnScreen(r"images\\home.png", grayscale=True, confidence=0.6)
-        time.sleep(1.5)
-        pts = gui.center(pos)
-        ptHome = pts
-        print(f"Home ({pts[0]}, {pts[1]})")
-        time.sleep(5)
+        itemHome = dctSettings["home"]
+        pts = (
+            int(itemHome[: itemHome.index(",")]),
+            int(itemHome[-itemHome.index(",") :]),
+        )
+
+        time.sleep(1)
         clickPOS(pts)
-        dctSettings["home"] = {"x": 0, "y": 0}
-        dctSettings["home"]["x"] = int(ptHome[0])
-        dctSettings["home"]["y"] = int(ptHome[1])
-        wrtJSONSettings(SETTING_FILENAME, dctSettings)
+
         # wrtJSonSetting('settings.json', json.dumps(dctSettings))
     except Exception as e:
+        gui.alert(e, "clickHome Exception")
         print(f"Exception clickHome {e}")
 
 
-# lstRes = ['bread', 'wood']
-
-
 def wrtEstTime():
-    f = open(r"temp\data.txt", "w")
-    f.write("0")
-    f.close()
+    with open(r"temp\data.txt", "w") as f:
+        f = open(r"temp\data.txt", "w")
 
 
 def main():
+    if isfile(SETTING_FILENAME):
+        with open(SETTING_FILENAME, "r") as fp:
+            dctSettings = json.load(fp)
+            print(dctSettings)
+    else:
+        wrtJSONSettings(SETTING_FILENAME, {})
+
     wrtEstTime()
     activeWndStrongHold()
     clickWorldButton()
@@ -196,8 +195,23 @@ def main():
     for item in lstRes:
         pts = getPosRes(item)
         if pts is not None:
-            getResourceByPos(pts)
-            exit(0)
+            gui.screenshot(r"temp/scene.png")
+            time.sleep(1)
+            isExisting = detectObject(
+                r"images/collectRes/" + item + "/1.png", r"temp/scene.png"
+            )
+            while isExisting:
+                getResourceByPos(pts)
+                sTime = extractText(r"temp/crop.jpg")
+                sec = convertTime2Second(sTime)
+                print(f"Second: {sec}")
+                clickHome()
+                gui.screenshot(r"temp/scene.png")
+                time.sleep(1)
+                isExisting = detectObject(
+                    r"images/collectRes/" + item + "/1.png", r"temp/scene.png"
+                )
+                time.sleep(int(sec))
     # core()
     pass
 
