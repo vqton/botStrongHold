@@ -41,7 +41,6 @@ iSecondSleep = 10
 TIME_LOCATING = 1
 ptHome = (0, 0)
 SETTING_FILENAME = "settings.json"
-
 dctSettings = {}
 
 
@@ -101,14 +100,13 @@ def sendScout():
             pts = parseString2Tuple(pt)
         clickPOS(pts)
 
+        clickPOS(pts)
         if isfile(r"temp\sample.png"):
             os.remove(r"temp\sample.png")
-
         gui.screenshot(r"temp\sample.png")
         time.sleep(TIME_LOCATING)
 
         isAS = isNotAvailableScout()
-
         if isAS == True:
             if "close" not in dctSettings:
                 pos = gui.locateOnScreen(
@@ -216,11 +214,9 @@ def clickHome():
             gui.screenshot(r"temp\scene.png")
             blCheck = detectObject(r"images\home2.png", r"temp\scene.png")
     except Exception as e:
+        gui.alert(e, "clickHome Exception")
         print(f"Exception clickHome {e}")
         logger.debug(f"Exception clickHome {e}")
-
-
-# lstRes = ['bread', 'wood']
 
 
 def wrtEstTime():
@@ -250,6 +246,7 @@ def main():
                 sTime = extractText(r"temp/crop.jpg")
                 sec = convertTime2Second(sTime)
                 print(f"Second: {sec}")
+                clickHome()
                 gui.screenshot(r"temp/scene.png")
                 time.sleep(1)
                 for x in getListFiles(r"images/collectRes/" + item):

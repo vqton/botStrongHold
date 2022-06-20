@@ -34,7 +34,7 @@ def wrtXmlSetting(fileName, data):
 
 
 def wrtJSONSettings(fileName, data):
-    with open(fileName, "w") as f:
+    with open(fileName, "w+") as f:
         json.dump(data, f)
 
 
@@ -77,3 +77,8 @@ def clickPOS(pts):
 def getListFiles(sPath):
     onlyfiles = [f for f in listdir(sPath) if isfile(join(sPath, f))]
     return onlyfiles
+
+
+def AddUpdateValueDict(dctName, item, pts):
+    dctName[item] = f"{int(pts[0])},{int(pts[1])}"
+    wrtJSONSettings("settings.xml", dctName)
