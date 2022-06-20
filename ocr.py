@@ -5,6 +5,7 @@ from os import path
 import pytesseract
 from imgPreprocessing import *
 from getDurationsSection import getSection
+
 # get grayscale image
 
 
@@ -14,10 +15,10 @@ def match_template(image, template):
 
 
 def core():
-    if os.path.isdir('./temp')==False:
-        os.mkdir('./temp')
+    if os.path.isdir("./temp") == False:
+        os.mkdir("./temp")
     # getSection('temp/sample.jpg', 'images/collectRes/object.png')
-    image = cv2.imread('temp/crop.jpg')
+    image = cv2.imread("temp/crop.jpg")
     # image = cv2.imread('aurebesh.jpg')
     gray = get_grayscale(image)
     # thresh =
@@ -26,10 +27,12 @@ def core():
     opening(gray)
     # canny =
     canny(gray)
-    pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd = (
+        "C:/Program Files/Tesseract-OCR/tesseract.exe"
+    )
     text = pytesseract.image_to_string(image)
     print(text)
     return text
 
 
-core()
+# core()clickHome

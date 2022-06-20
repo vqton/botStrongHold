@@ -7,8 +7,21 @@ from dict2xml import dict2xml
 
 from os import listdir
 from os.path import isfile, join
+
 results = []
 top_windows = []
+
+
+def doubleClickPos(pts):
+    gui.moveTo(pts[0], pts[1])
+    time.sleep(0.5)
+    gui.click(pts[0], pts[1], 2)
+    time.sleep(3)
+
+
+def parseString2Tuple(s):
+    a = s.split(",")
+    return (int(a[0]), int(a[1]))
 
 
 def windowEnumerationHandler(hwnd, top_windows):
@@ -16,8 +29,8 @@ def windowEnumerationHandler(hwnd, top_windows):
 
 
 def wrtXmlSetting(fileName, data):
-    with open(fileName, 'w') as xFile:
-        xFile.write(dict2xml(data, wrap='root'))
+    with open(fileName, "w") as xFile:
+        xFile.write(dict2xml(data, wrap="root"))
 
 
 def wrtJSONSettings(fileName, data):
@@ -29,7 +42,7 @@ def convertTime2Second(sTime):
     a = ""
     for x in sTime:
         if x.isdigit():
-            a = a+x
+            a = a + x
     try:
         min2sec = int(a[:2])
         sec = (min2sec * 60) + int(a[-2:])

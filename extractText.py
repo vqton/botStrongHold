@@ -36,4 +36,4 @@ def extractText(imagePath):
     return data
 
 
-extractText(r"temp/crop.jpg")
+# extractText(r"temp/crop.jpg")
