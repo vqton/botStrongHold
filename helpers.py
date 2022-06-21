@@ -12,12 +12,24 @@ results = []
 top_windows = []
 
 
+def doubleClickPos(pts):
+    gui.moveTo(pts[0], pts[1])
+    time.sleep(0.5)
+    gui.click(pts[0], pts[1], 2)
+    time.sleep(3)
+
+
+def parseString2Tuple(s):
+    a = s.split(",")
+    return (int(a[0]), int(a[1]))
+
+
 def windowEnumerationHandler(hwnd, top_windows):
     top_windows.append((hwnd, win32gui.GetWindowText(hwnd)))
 
 
 def wrtXmlSetting(fileName, data):
-    with open(fileName, "w+") as xFile:
+    with open(fileName, "w") as xFile:
         xFile.write(dict2xml(data, wrap="root"))
 
 
