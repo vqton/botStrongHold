@@ -1,4 +1,3 @@
-from pandas import ExcelWriter
 from requests import get
 from extractText import extractText
 from getDurationsSection import getSection
@@ -16,9 +15,9 @@ import time
 import pyautogui as gui
 from helpers import *
 from startapp import login, startapp
+import yaml
 
-logging.config.fileConfig(fname="log.config", disable_existing_loggers=False)
-logger = logging.getLogger(__name__)
+
 sText = ""
 lstRes = [
     "stash",
@@ -220,6 +219,7 @@ def clickHome():
 
 
 def wrtEstTime():
+
     with open(r"temp\data.txt", "w") as f:
         f.write("0")
         f.close()
@@ -228,6 +228,11 @@ def wrtEstTime():
 def main():
 
     # Get the logger specified in the file
+
+    if "screen" not in dctSettings:
+        pts = gui.size()
+        dctSettings["screen"] = f"int(pts[0]), int(pts[1])"
+        wrtJSONSettings(SETTING_FILENAME, dctSettings)
 
     wrtEstTime()
     activeWndStrongHold()
@@ -262,9 +267,22 @@ def main():
 
 
 if __name__ == "__main__":
+
+    if os.path.isdir("temp") == False:
+        os.makedirs("temp")
+
+    if isfile(SETTING_FILENAME) == False:
+        wrtJSONSettings(SETTING_FILENAME, {})
+
     if len(dctSettings) == 0:
         with open(SETTING_FILENAME, "r") as f:
             dctSettings = json.loads(f.read())
             print(dctSettings)
+
+    # initialization logging
+    with open(r"config.yaml", "r") as stream:
+        config = yaml.load(stream, Loader=yaml.FullLoader)
+        logging.config.dictConfig(config)
+        logger = logging.getLogger(__name__)
 
     main()
