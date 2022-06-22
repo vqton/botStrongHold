@@ -191,6 +191,21 @@ def getResource(sResource):
         sendScout()
 
 
+def searchCaptital():
+    try:
+        bxCap = gui.locateOnScreen(
+            r"images/capital1.png", grayscale=True, confidence=0.7
+        )
+        time.sleep(2)
+        pts = gui.center(bxCap)
+        clickPOS(pts)
+    except Exception as e:
+        gui.alert(e, "Search Capital")
+        logger.debug(e)
+        exit(1)
+    pass
+
+
 def clickHome():
     try:
         if "select" not in dctSettings:
@@ -233,7 +248,8 @@ def main():
     activeWndStrongHold()
     clickWorldButton()
     clickHome()
-    gui.dragTo(100, 100, duration=0.5)
+    searchCaptital()
+    # gui.dragTo(50, 50, duration=0.5)
     for item in lstRes:
         print(item)
         pts = getPosRes(item)
@@ -242,7 +258,7 @@ def main():
             while True:
                 getResourceByPos(pts)
                 if isfile(r"temp/crop.jpg") == False:
-                    getSection(r"temp/sample.png", r"images/collectRes/object.png")
+                    getSection(r"temp/sample.png", r"images/object.png")
                 sTime = extractText(r"temp/crop.jpg")
                 sec = convertTime2Second(sTime)
                 print(f"Second: {sec}")
