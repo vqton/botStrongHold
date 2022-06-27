@@ -1,6 +1,8 @@
 import win32gui
+import random
 import pyautogui as gui
 import time
+import re
 import math
 import json
 from dict2xml import dict2xml
@@ -39,10 +41,8 @@ def wrtJSONSettings(fileName, data):
 
 
 def convertTime2Second(sTime):
-    a = ""
-    for x in sTime:
-        if x.isdigit():
-            a = a + x
+    a = re.sub("[^0-9]+", "", sTime)
+
     try:
         min2sec = int(a[:2])
         sec = (min2sec * 60) + int(a[-2:])
@@ -66,12 +66,13 @@ def BringWindow2Front(sName):
 
 
 def clickPOS(pts):
+    second = random.uniform(0.1, 0.999)
     gui.moveTo(pts[0], pts[1])
-    time.sleep(0.5)
+    time.sleep(second)
     gui.mouseDown(pts[0], pts[1])
-    time.sleep(0.5)
+    time.sleep(second)
     gui.mouseUp(pts[0], pts[1])
-    time.sleep(3)
+    time.sleep(second)
 
 
 def getListFiles(sPath):

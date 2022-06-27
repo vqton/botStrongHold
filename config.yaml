@@ -1,0 +1,28 @@
+version: 1
+disable_existing_loggers: true
+formatters:
+  simple:
+    format: "%(asctime)s - %(filename)s - %(name)s - %(funcName)s - %(lineno)d - %(levelname)s - %(message)s"
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+  file:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: simple
+    filename: logs/scout.log
+    maxBytes: 4096 # 1MB
+    backupCount: 20
+    encoding: utf8
+
+loggers:
+  simpleExample:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: no
+root:
+  level: DEBUG
+  handlers: [console, file]

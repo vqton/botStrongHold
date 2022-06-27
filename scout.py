@@ -1,10 +1,10 @@
-from pandas import ExcelWriter
 from requests import get
 from extractText import extractText
 from getDurationsSection import getSection
 from ocr import core
 from functools import reduce
 import os
+from os import path
 import logging
 import logging.config
 import json
@@ -16,23 +16,23 @@ import time
 import pyautogui as gui
 from helpers import *
 from startapp import login, startapp
+import yaml
 
-logging.config.fileConfig(fname="log.config", disable_existing_loggers=False)
-logger = logging.getLogger(__name__)
+matchTemplateImagePath = ""
 sText = ""
 lstRes = [
     "stash",
+    "apple",
     "fish",
+    "meat",
     "veg",
     "salt",
-    "apple",
+    "cheese",
+    "bread",
     "wood",
     "stone",
     "iron",
-    "cheese",
-    "meat",
     "clothes",
-    "bread",
     "wine",
     "furniture",
 ]
@@ -74,7 +74,6 @@ def letGo():
     except Exception as e:
         print(f"letGo: {e}")
         logger.debug(f"letGo: {e}")
-
     pass
 
 
@@ -84,7 +83,6 @@ def isNotAvailableScout():
 
 
 def sendScout():
-
     try:
         if "scout" not in dctSettings:
             posCollect = gui.locateOnScreen(
@@ -93,19 +91,16 @@ def sendScout():
             time.sleep(TIME_LOCATING)
             pts = gui.center(posCollect)
             dctSettings["scout"] = f"{int(pts[0])}, {int(pts[1])}"
-
             wrtJSONSettings(SETTING_FILENAME, dctSettings)
         else:
             pt = dctSettings["scout"]
             pts = parseString2Tuple(pt)
         clickPOS(pts)
-
-        clickPOS(pts)
-        if isfile(r"temp\sample.png"):
+        if path.exists(r"temp\sample.png"):
             os.remove(r"temp\sample.png")
         gui.screenshot(r"temp\sample.png")
         time.sleep(TIME_LOCATING)
-
+        getSection(r"temp\sample.png", r"images\object.png")
         isAS = isNotAvailableScout()
         if isAS == True:
             if "close" not in dctSettings:
@@ -117,18 +112,14 @@ def sendScout():
                 dctSettings["close"] = f"{int(ps1[0])}, {int(ps1[1])}"
                 wrtJSONSettings(SETTING_FILENAME, dctSettings)
                 clickPOS(ps1)
-                print(f" in {ps1}")
             else:
                 ps1 = parseString2Tuple(dctSettings["close"])
                 clickPOS(ps1)
-                print(f" not in {ps1}")
             time.sleep(TIME_LOCATING)
-
         with open(r"temp\data.txt", "w") as f:
             sTime = extractText(r"temp\crop.jpg")
             second = convertTime2Second(sTime)
             f.write(str(second))
-
         letGo()
     except Exception as e:
         print(f"sendScout: {e}")
@@ -158,6 +149,26 @@ def clickWorldButton():
         exit(1)
 
 
+def clickCapital():
+    try:
+        if "capital" not in dctSettings:
+            bxCap = gui.locateOnScreen(
+                r"E:\botStrongHold\images\capital.png", grayscale=True, confidence=0.5
+            )
+            time.sleep(TIME_LOCATING * 2)
+            pts = gui.center(bxCap)
+            logger.info(f"Capital at {pts}")
+            dctSettings["capital"] = f"{int(pts[0])}, {int(pts[1])}"
+            wrtJSONSettings(SETTING_FILENAME, dctSettings)
+            clickPOS(pts)
+        else:
+            pts = parseString2Tuple(dctSettings["capital"])
+            clickPOS(pts)
+    except Exception as e:
+        logger.debug(f"Click capital error message {e}")
+        exit(1)
+
+
 def getPosRes(sResource):
     sPath = "images/collectRes/" + sResource + "/"
     lstFile = getListFiles(sPath)
@@ -166,8 +177,11 @@ def getPosRes(sResource):
         posResource = gui.locateOnScreen(spathRes, grayscale=True, confidence=0.8)
         time.sleep(TIME_LOCATING)
         if not isinstance(posResource, type(None)):
+            # matchTemplateImagePath = spathRes
+            with open(r"temp/abc.txt", "w") as fp:
+                fp.write(str(spathRes))
             pts = gui.center(posResource)
-            print(f"Found {sResource} at {pts[0]},{pts[1]}")
+            logger.info(f"Found {spathRes} - {sResource} at {pts[0]},{pts[1]}")
             return pts
 
 
@@ -221,50 +235,70 @@ def clickHome():
 
 def wrtEstTime():
     with open(r"temp\data.txt", "w") as f:
-        f.write("0")
-        f.close()
+        f.write(str(0))
 
 
 def main():
 
     # Get the logger specified in the file
-
+    round = 0
+    if "screen" not in dctSettings:
+        pts = gui.size()
+        dctSettings["screen"] = f"{int(pts[0])}, {int(pts[1])}"
+        wrtJSONSettings(SETTING_FILENAME, dctSettings)
     wrtEstTime()
     activeWndStrongHold()
     clickWorldButton()
     clickHome()
-    gui.dragTo(100, 100, duration=0.5)
-    for item in lstRes:
-        print(item)
-        pts = getPosRes(item)
-        if pts is not None:
-            logger.info(f"Found {item} at {pts[0]},{pts[1]}")
-            while True:
-                getResourceByPos(pts)
-                if isfile(r"temp/crop.jpg") == False:
-                    getSection(r"temp/sample.png", r"images/collectRes/object.png")
-                sTime = extractText(r"temp/crop.jpg")
-                sec = convertTime2Second(sTime)
-                print(f"Second: {sec}")
-                clickHome()
-                gui.screenshot(r"temp/scene.png")
-                time.sleep(1)
-                for x in getListFiles(r"images/collectRes/" + item):
-                    imgPath = r"images/collectRes/" + item + "/" + x
+    clickCapital()
+    # gui.dragTo(45, 500, duration=0.5)
+    gui.moveTo(849, 449, 1)
+
+    while round < 3:
+        gui.scroll(round)
+        for item in lstRes:
+            logger.info(f"Looking for {item}")
+            # print(item)
+            pts = getPosRes(item)
+            if pts is not None:
+                logger.info(f"Found {item} at {pts[0]},{pts[1]}")
+                while True:
+                    activeWndStrongHold()
+                    getResourceByPos(pts)
+                    sTime = extractText(r"temp/crop.jpg")
+                    sec = convertTime2Second(sTime)
+                    with open(r"temp/data.txt", "w") as fp:
+                        fp.write(str(sec))
+                    clickHome()
+                    clickCapital()
+                    gui.screenshot(r"temp/scene.png")
+                    with open(r"temp/abc.txt", "r") as f:
+                        imgPath = f.readline()
+                    # imgPath = matchTemplateImagePath
                     logger.info(f"Checking {imgPath}")
                     isExisting = detectObject(imgPath, r"temp/scene.png")
-                if isExisting == False:
-                    break
-                clickHome()
-                time.sleep(int(sec))
-
+                    logger.debug(f"{imgPath}")
+                    if isExisting == False:
+                        break
+                    clickHome()
+                    logger.info(f"Next scouting start in {sec} seconds")
+                    time.sleep(int(sec))
+    round += 1
     pass
 
 
 if __name__ == "__main__":
+    # initialization logging
+    with open(r"config.yaml", "r") as stream:
+        config = yaml.load(stream, Loader=yaml.FullLoader)
+        logging.config.dictConfig(config)
+        logger = logging.getLogger(__name__)
+    if os.path.isdir("temp") == False:
+        os.makedirs("temp")
+    if isfile(SETTING_FILENAME) == False:
+        wrtJSONSettings(SETTING_FILENAME, {})
     if len(dctSettings) == 0:
         with open(SETTING_FILENAME, "r") as f:
             dctSettings = json.loads(f.read())
-            print(dctSettings)
-
+            logger.info(dctSettings)
     main()
