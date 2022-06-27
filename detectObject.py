@@ -1,42 +1,53 @@
 # Python program to illustrate
 # template matching
 import cv2
+import logging
+import logging.config
+import yaml
 import numpy as np
 
+with open(r"config.yaml", "r") as stream:
+    config = yaml.load(stream, Loader=yaml.FullLoader)
+    logging.config.dictConfig(config)
+    logger = logging.getLogger(__name__)
 
-def detectObject(obj,scene):
-    # Read the main image
-    img_rgb = cv2.imread(scene)
 
-    # Convert it to grayscale
-    img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
-    wrongObject = r'images\object.png'
-    # Read the template
-    template = cv2.imread(obj, 0)
-    # template = cv2.imread(wrongObject, 0)
-    # template = cv2.imread(r'images\object.png', 0)
+def detectObject(obj, scene):
+    try:
+        # Read the main image
+        img_rgb = cv2.imread(scene)
 
-    # Store width and height of template in w and h
-    w, h = template.shape[::-1]
+        # Convert it to grayscale
+        img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
+        wrongObject = r"images\object.png"
+        # Read the template
+        template = cv2.imread(obj, 0)
+        # template = cv2.imread(wrongObject, 0)
+        # template = cv2.imread(r'images\object.png', 0)
 
-    # Perform match operations.
-    res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
+        # Store width and height of template in w and h
+        w, h = template.shape[::-1]
 
-    # Specify a threshold
-    threshold = 0.9
+        # Perform match operations.
+        res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
 
-    # Store the coordinates of matched area in a numpy array
-    loc = np.where(res >= threshold)
+        # Specify a threshold
+        threshold = 0.9
 
-    isExisting = False
-    # Draw a rectangle around the matched region.
-    
-    for pt in zip(*loc[::-1]):
-        cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
-        isExisting=True
+        # Store the coordinates of matched area in a numpy array
+        loc = np.where(res >= threshold)
 
-    # Show the final image with the matched area.
-    return isExisting
+        isExisting = False
+        # Draw a rectangle around the matched region.
+
+        for pt in zip(*loc[::-1]):
+            cv2.rectangle(img_rgb, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
+            isExisting = True
+
+        # Show the final image with the matched area.
+        return isExisting
+    except Exception as e:
+        logger.debug(f"{e}")
 
 
 # print(detectObject(r'images\zero.jpg',r'temp\sample.png'))
