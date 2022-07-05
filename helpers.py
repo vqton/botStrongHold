@@ -1,3 +1,4 @@
+import yaml
 import win32gui
 import random
 import pyautogui as gui
@@ -6,7 +7,8 @@ import re
 import math
 import json
 from dict2xml import dict2xml
-
+import logging
+import logging.config
 from os import listdir
 from os.path import isfile, join
 
@@ -22,8 +24,12 @@ def doubleClickPos(pts):
 
 
 def parseString2Tuple(s):
-    a = s.split(",")
-    return (int(a[0]), int(a[1]))
+    try:
+        logger.info(f"parseString2Tuple {s}")
+        a = s.split(",")
+        return (int(a[0]), int(a[1]))
+    except Exception as e:
+        logger.debug(f"parseString2Tuple Exception {e}")
 
 
 def windowEnumerationHandler(hwnd, top_windows):
@@ -83,3 +89,9 @@ def getListFiles(sPath):
 def AddUpdateValueDict(dctName, item, pts):
     dctName[item] = f"{int(pts[0])},{int(pts[1])}"
     wrtJSONSettings("settings.xml", dctName)
+
+
+with open(r"config.yaml", "r") as stream:
+    config = yaml.load(stream, Loader=yaml.FullLoader)
+    logging.config.dictConfig(config)
+    logger = logging.getLogger(__name__)
