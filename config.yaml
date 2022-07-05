@@ -14,7 +14,7 @@ handlers:
     level: INFO
     formatter: simple
     filename: logs/scout.log
-    maxBytes: 4096 # 1MB
+    maxBytes: 524288 # 0.5MB
     backupCount: 20
     encoding: utf8
 

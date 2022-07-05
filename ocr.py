@@ -32,7 +32,7 @@ def core():
         "C:/Program Files/Tesseract-OCR/tesseract.exe"
     )
     text = pytesseract.image_to_string(image, config="--psm 6")
-    # print(re.sub("[^0-9]+", "", text))
+    print(re.sub("[^0-9]+", "", text))
     return re.sub("[^0-9]+", "", text)
 
 
